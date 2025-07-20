@@ -6,6 +6,8 @@ WORKDIR /app
 
 # Instalar dependencias del sistema operativo que OpenCV necesita para funcionar
 RUN apt-get update && apt-get install -y \
+    build-essential \
+    cmake \
     libgl1-mesa-glx \
     libglib2.0-0 \
     && rm -rf /var/lib/apt/lists/*
