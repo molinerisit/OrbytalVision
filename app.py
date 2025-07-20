@@ -113,7 +113,8 @@ def requires_auth(f):
 def video_processing_loop():
     global output_frame, latest_captures, tracked_persons_info, last_successful_frame_time
     print("[HILO DE VIDEO]: Iniciando...")
-    cap = cv2.VideoCapture(RTSP_URL)
+    # Forzar a OpenCV a usar TCP para mayor compatibilidad con túneles
+    cap = cv2.VideoCapture(RTSP_URL, cv2.CAP_FFMPEG)
     if not cap.isOpened(): print("!!! ERROR: No se pudo conectar a la cámara."); return
     print("[HILO DE VIDEO]: Conexión exitosa.")
     face_trackers = {}; next_tracker_id = 0; frame_count = 0
