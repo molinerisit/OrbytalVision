@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Registro de Eventos</title>
+    <!-- (Usa los mismos estilos que en gestion.html para consistencia) -->
+    <style>
+        body { font-family: sans-serif; background-color: #1a1a1a; color: #eee; margin: 0; padding: 0; }
+        /* ... (Copia los estilos de nav, h1, etc. desde gestion.html) ... */
+        table { width: 95%; margin: 20px auto; border-collapse: collapse; }
+        th, td { padding: 12px; border: 1px solid #444; text-align: left; }
+        th { background-color: #333; }
+        tr:nth-child(even) { background-color: #2c2c2c; }
+        .evento-alerta { color: #ffc107; font-weight: bold; }
+        .evento-poi { color: #dc3545; font-weight: bold; }
+    </style>
+</head>
+<body>
+   <nav>
+    <a href="/">Video en Vivo</a>
+    <a href="/eventos">Registro de Eventos</a>
+    <a href="/galeria">Clasificar Nuevas Capturas</a>
+    <a href="/gestion">Gestionar Personas (Watchlists)</a>
+   </nav>
+    <h1>Registro de Eventos del Sistema</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>Timestamp</th>
+                <th>Tipo de Evento</th>
+                <th>Persona ID</th>
+                <th>Nombre</th>
+                <th>Notas</th>
+                <th>Captura</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for evento in eventos %}
+            <tr>
+                <td>{{ evento['timestamp'] }}</td>
+                <td class="{% if 'alerta' in evento['tipo_evento'] %}evento-alerta{% endif %}{% if 'poi' in evento['tipo_evento'] %}evento-poi{% endif %}">
+                    {{ evento['tipo_evento'].replace('_', ' ').title() }}
+                </td>
+                <td>{{ evento['persona_id'] }}</td>
+                <td>{{ evento['nombre_persona'] }}</td>
+                <td>{{ evento['notas'] }}</td>
+                <td>
+                    {% if evento['ruta_imagen'] %}
+                        <a href="/capturas/{{ evento['ruta_imagen'] }}" target="_blank">Ver Imagen</a>
+                    {% endif %}
+                </td>
+            </tr>
+            {% else %}
+            <tr><td colspan="6" style="text-align:center;">No hay eventos registrados.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>

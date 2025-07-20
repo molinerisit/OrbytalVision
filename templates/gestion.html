@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Gestión de Watchlists</title>
+    <style>
+        /* --- Estilos Globales --- */
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #1a1a1a;
+            color: #eee;
+            margin: 0;
+            padding: 0;
+        }
+
+        nav {
+            background-color: #333;
+            padding: 10px;
+            text-align: center;
+            border-bottom: 2px solid #555;
+        }
+
+        nav a {
+            color: #fff;
+            text-decoration: none;
+            padding: 10px 20px;
+            font-size: 1.2em;
+            border-radius: 5px;
+            transition: background-color 0.2s ease-in-out;
+        }
+
+        nav a:hover {
+            background-color: #555;
+        }
+
+        h1,
+        h2 {
+            text-align: center;
+            color: #00aaff;
+        }
+
+        h2 {
+            border-bottom: 1px solid #444;
+            padding-bottom: 10px;
+            margin-top: 0;
+        }
+
+        /* --- Contenedores Principales --- */
+        .category-section {
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #252525;
+            border-radius: 12px;
+            max-width: 1200px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        .person-grid {
+            display: grid;
+            /* Columnas flexibles que se adaptan al tamaño */
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 20px;
+        }
+
+        /* --- Tarjeta de Persona (Mejorada) --- */
+        .person-item {
+            background-color: #2c2c2c;
+            border: 1px solid #444;
+            border-radius: 8px;
+            padding: 15px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            /* Organiza los elementos verticalmente */
+            justify-content: space-between;
+            /* Espacia los elementos internos */
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .person-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
+        }
+
+        .person-item img {
+            width: 100%;
+            height: auto;
+            border-radius: 5px;
+            object-fit: cover;
+            aspect-ratio: 1 / 1;
+            /* Mantiene la imagen cuadrada */
+        }
+
+        .person-item p {
+            font-size: 0.9em;
+            word-wrap: break-word;
+            margin: 10px 0;
+            color: #ccc;
+            flex-grow: 1;
+            /* Permite que el nombre ocupe el espacio sobrante */
+        }
+
+        /* --- Controles de Acciones (Flexbox para evitar desbordamiento) --- */
+        .actions {
+            margin-top: 15px;
+            display: flex;
+            flex-direction: column;
+            /* Apila los controles verticalmente */
+            gap: 10px;
+            /* Espacio entre los controles */
+        }
+
+        .modify-form {
+            display: flex;
+            gap: 5px;
+            /* Espacio entre el select y el botón */
+            width: 100%;
+        }
+
+        .actions select {
+            padding: 8px;
+            background-color: #444;
+            color: #fff;
+            border: 1px solid #555;
+            border-radius: 4px;
+            width: 100%;
+            /* El select ocupa todo el espacio disponible */
+            flex-grow: 1;
+        }
+
+        .actions button {
+            padding: 8px 12px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: opacity 0.2s;
+        }
+
+        .actions button:hover {
+            opacity: 0.8;
+        }
+
+        .delete-btn {
+            background-color: #dc3545;
+            color: white;
+            width: 100%;
+            /* El botón de eliminar ocupa todo el ancho */
+        }
+
+        .modify-btn {
+            background-color: #ffc107;
+            color: black;
+        }
+    </style>
+</head>
+
+<body>
+   <nav>
+    <a href="/">Video en Vivo</a>
+    <a href="/eventos">Registro de Eventos</a>
+    <a href="/galeria">Clasificar Nuevas Capturas</a>
+    <a href="/gestion">Gestionar Personas (Watchlists)</a>
+   </nav>
+    <h1>Gestión de Personas Registradas</h1>
+
+    {% for category, people in watchlists.items() %}
+    <div class="category-section">
+        <h2>{{ category.replace('_', ' ').title() }}</h2>
+        <div class="person-grid">
+            {% for person_file in people %}
+            <div class="person-item" id="item-{{ category }}-{{ loop.index }}">
+                <img src="/watchlists/{{ category }}/{{ person_file }}" alt="{{ person_file }}">
+                <p>{{ person_file.split('.')[0].replace('_', ' ').title() }}</p>
+                <div class="actions">
+                    <button class="delete-btn"
+                        onclick="deletePerson('{{ person_file }}', '{{ category }}', '{{ loop.index }}')">Eliminar</button>
+                    <form onsubmit="modifyPerson(event, '{{ person_file }}', '{{ category }}', '{{ loop.index }}')">
+                        <select name="new_category">
+                            {% for cat in watchlists.keys() %}{% if cat != category %}<option value="{{ cat }}">{{
+                                cat.replace('_', ' ').title() }}</option>{% endif %}{% endfor %}
+                        </select>
+                        <button type="submit" class="modify-btn">Mover</button>
+                    </form>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endfor %}
+
+    <script>
+        function handleResponse(response, elementId) {
+            if (response.success) {
+                const itemToRemove = document.getElementById(elementId);
+                if (itemToRemove) {
+                    itemToRemove.style.transition = 'opacity 0.5s ease';
+                    itemToRemove.style.opacity = '0';
+                    setTimeout(() => itemToRemove.remove(), 500);
+                }
+                alert('Operación exitosa.');
+            } else {
+                alert('Error: ' + response.error);
+            }
+        }
+
+        function deletePerson(filename, category, itemId) {
+            if (!confirm(`¿Estás seguro de que quieres eliminar a ${filename} de la lista ${category}?`)) return;
+
+            fetch('/api/delete_person', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ filename: filename, category: category })
+            })
+                .then(res => res.json())
+                .then(data => handleResponse(data, `item-${category}-${itemId}`))
+                .catch(err => console.error('Error:', err));
+        }
+
+        function modifyPerson(event, filename, oldCategory, itemId) {
+            event.preventDefault();
+            const newCategory = event.target.elements.new_category.value;
+
+            fetch('/api/modify_person', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ filename: filename, old_category: oldCategory, new_category: newCategory })
+            })
+                .then(res => res.json())
+                .then(data => {
+                    handleResponse(data, `item-${oldCategory}-${itemId}`);
+                    if (data.success) {
+                        // Opcional: recargar la página para ver el cambio reflejado en la nueva sección
+                        setTimeout(() => location.reload(), 600);
+                    }
+                })
+                .catch(err => console.error('Error:', err));
+        }
+    </script>
+</body>
+
+</html>

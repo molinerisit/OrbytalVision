@@ -1,0 +1,7 @@
+Flask
+numpy
+opencv-contrib-python
+face_recognition
+pymongo
+psutil
+python-dotenv
