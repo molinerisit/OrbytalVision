@@ -287,7 +287,7 @@ def modify_person():
     return jsonify({"success": True})
 
 @app.route("/health")
-@requires_auth
+# @requires_auth
 def health_check():
     with lock: time_since_last_frame = (datetime.now() - last_successful_frame_time).total_seconds()
     if time_since_last_frame > 45:
